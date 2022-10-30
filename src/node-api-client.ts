@@ -1,17 +1,17 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import { createHmac } from 'crypto';
 
-import { ApiOptions, ApiRequestOptions, HttpMethod } from './node-api-client-types';
+import { ApiClientOptions, ApiRequestOptions, HttpMethod } from './node-api-client-types';
 
 
 export abstract class ApiClient {
 
   abstract baseUrl(): string;
 
-  protected options: ApiOptions;
+  protected options: ApiClientOptions;
   
   constructor(
-    options?: ApiOptions,
+    options?: ApiClientOptions,
   ) {
     this.options = { ...this.defaultOptions, ...options };
   }
@@ -28,7 +28,7 @@ export abstract class ApiClient {
 
   get isTest(): boolean { return !!this.options?.isTest; }
 
-  get defaultOptions(): Partial<ApiOptions> {
+  get defaultOptions(): Partial<ApiClientOptions> {
     return {
       isTest: false,
     }

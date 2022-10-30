@@ -8,7 +8,7 @@ export interface ApiCredentials {
   apiPassphrase?: string;
 };
 
-export interface ApiOptions extends ApiCredentials {
+export interface ApiClientOptions extends ApiCredentials {
   /** Indica si l'api està en mode test o en real. */
   isTest?: boolean,
 }

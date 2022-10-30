@@ -15,9 +15,9 @@ npm i @metacodi@node-api-client
 
 `my-server-types.ts`
 ```typescript
-import { ApiOptions } from '@metacodi/node-api-client';
+import { ApiClientOptions } from '@metacodi/node-api-client';
 
-export interface ServerOptions extends ApiOptions {
+export interface ServerOptions extends ApiClientOptions {
   apiBaseUrl: string;
   apiIdUser: number;
 }

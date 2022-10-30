@@ -1,14 +1,14 @@
 import { AxiosError } from 'axios';
-import { ApiOptions, ApiRequestOptions, HttpMethod } from './node-api-client-types';
+import { ApiClientOptions, ApiRequestOptions, HttpMethod } from './node-api-client-types';
 export declare abstract class ApiClient {
     abstract baseUrl(): string;
-    protected options: ApiOptions;
-    constructor(options?: ApiOptions);
+    protected options: ApiClientOptions;
+    constructor(options?: ApiClientOptions);
     get apiKey(): string;
     get apiSecret(): string;
     get apiPassphrase(): string;
     get isTest(): boolean;
-    get defaultOptions(): Partial<ApiOptions>;
+    get defaultOptions(): Partial<ApiClientOptions>;
     setCredentials(data: {
         apiKey: string;
         apiSecret: string;

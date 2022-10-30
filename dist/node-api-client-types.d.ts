@@ -4,7 +4,7 @@ export interface ApiCredentials {
     apiSecret?: string;
     apiPassphrase?: string;
 }
-export interface ApiOptions extends ApiCredentials {
+export interface ApiClientOptions extends ApiCredentials {
     isTest?: boolean;
 }
 export interface ApiRequestOptions {
