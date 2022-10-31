@@ -196,8 +196,8 @@ class ApiClient {
                 errorMessage.message = `${errorMessage.message} ${data.message}${data.message.endsWith('.') ? '' : '.'}`;
             }
             throw {
-                code: data.api_code || data.http_code,
-                message: data.message,
+                code: (errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.code) || data.api_code || data.http_code,
+                message: (errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.message) || data.message,
             };
         }
         throw Object.assign(Object.assign({}, errorMessage), { requestCode: response.status, requestMessage: response.statusText, body: response.data, headers: response.headers, requestUrl: url, requestBody: request.body, options: Object.assign({}, this.options) });

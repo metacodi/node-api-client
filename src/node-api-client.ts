@@ -217,8 +217,8 @@ export abstract class ApiClient {
     if (!!data?.http_code && !!data.message) {
       if (data.message) { errorMessage.message = `${errorMessage.message} ${data.message}${data.message.endsWith('.') ? '' : '.'}`; }
       throw {
-        code: data.api_code || data.http_code,
-        message: data.message,
+        code: errorMessage?.code || data.api_code || data.http_code,
+        message: errorMessage?.message || data.message,
       }
     }
     throw {
