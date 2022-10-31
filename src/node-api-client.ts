@@ -97,7 +97,7 @@ export abstract class ApiClient {
     const protocol = baseUrl.startsWith('http') ? '' : 'https://';
     config.url = protocol + [baseUrl, endpoint].join('/');
 
-    console.log(config);
+    // console.log(config);
 
     return axios(config).then(response => {
       // console.log(config.url, response);

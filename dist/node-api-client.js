@@ -74,7 +74,6 @@ class ApiClient {
             }
             const protocol = baseUrl.startsWith('http') ? '' : 'https://';
             config.url = protocol + [baseUrl, endpoint].join('/');
-            console.log(config);
             return (0, axios_1.default)(config).then(response => {
                 if (response.status !== 200) {
                     throw response;
