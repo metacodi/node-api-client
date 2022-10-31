@@ -118,15 +118,11 @@ class ApiClient {
             const timestamp = Date.now();
             const message = this.buildSignMessage(timestamp, method, endpoint, params);
             const signature = yield this.signMessage(message, apiSecret);
-            const locale = 'en-US';
             const headers = {
                 'ACCESS-SIGN': signature,
                 'ACCESS-TIMESTAMP': timestamp,
                 'ACCESS-KEY': apiKey,
                 'ACCESS-PASSPHRASE': apiPassphrase,
-                'Content-Type': 'application/json',
-                Cookie: 'locale=' + locale,
-                locale,
             };
             return headers;
         });
