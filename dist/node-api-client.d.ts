@@ -31,7 +31,7 @@ export declare abstract class ApiClient {
     protected getAuthHeaders(method: HttpMethod, endpoint: string, params: any): Promise<{
         [header: string]: string | number;
     }>;
-    protected buildSignMessage(method: HttpMethod, endpoint: string, params: any): string;
+    protected buildSignMessage(timestamp: number | string, method: HttpMethod, endpoint: string, params: any): string;
     protected formatQuery(params: any): string;
     protected serialiseParams(request?: {
         [key: string]: any;

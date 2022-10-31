@@ -116,10 +116,7 @@ class ApiClient {
         return __awaiter(this, void 0, void 0, function* () {
             const { apiKey, apiSecret, apiPassphrase } = this;
             const timestamp = Date.now();
-            const mParams = String(JSON.stringify(params)).slice(1, -1);
-            const formatedParams = String(mParams).replace(/\\/g, '');
-            const data = (method === 'GET' || method === 'DELETE') ? this.formatQuery(params) : formatedParams;
-            const message = this.buildSignMessage(method, endpoint, params);
+            const message = this.buildSignMessage(timestamp, method, endpoint, params);
             const signature = yield this.signMessage(message, apiSecret);
             const locale = 'en-US';
             const headers = {
@@ -134,12 +131,11 @@ class ApiClient {
             return headers;
         });
     }
-    buildSignMessage(method, endpoint, params) {
-        const timestamp = Date.now();
+    buildSignMessage(timestamp, method, endpoint, params) {
         const mParams = String(JSON.stringify(params)).slice(1, -1);
         const formatedParams = String(mParams).replace(/\\/g, '');
         const data = (method === 'GET' || method === 'DELETE') ? this.formatQuery(params) : formatedParams;
-        return timestamp + method + endpoint + data;
+        return `${timestamp}${method}${endpoint}${data}`;
     }
     formatQuery(params) {
         if (!!params && JSON.stringify(params).length !== 2) {

@@ -138,11 +138,7 @@ export abstract class ApiClient {
     const { apiKey, apiSecret, apiPassphrase } = this;
 
     const timestamp = Date.now();
-    const mParams = String(JSON.stringify(params)).slice(1, -1);
-    const formatedParams = String(mParams).replace(/\\/g, '');
-    const data = (method === 'GET' || method === 'DELETE') ? this.formatQuery(params) : formatedParams;
-    const message = this.buildSignMessage(method, endpoint, params);
-    // console.log('message =>', message);
+    const message = this.buildSignMessage(timestamp, method, endpoint, params);
     const signature = await this.signMessage(message, apiSecret);
     const locale = 'en-US';
     const headers: { [header: string]: number | string } = {
@@ -157,12 +153,11 @@ export abstract class ApiClient {
     return headers;
   }
 
-  protected buildSignMessage(method: HttpMethod, endpoint: string, params: any): string {
-    const timestamp = Date.now();
+  protected buildSignMessage(timestamp: number | string, method: HttpMethod, endpoint: string, params: any): string {
     const mParams = String(JSON.stringify(params)).slice(1, -1);
     const formatedParams = String(mParams).replace(/\\/g, '');
     const data = (method === 'GET' || method === 'DELETE') ? this.formatQuery(params) : formatedParams;
-    return timestamp + method + endpoint + data;
+    return `${timestamp}${method}${endpoint}${data}`;
   }
 
   protected formatQuery(params: any) {
