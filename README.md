@@ -54,7 +54,7 @@ export class MyServer extends ApiClient {
   requestGoogleMaps(googleParams: any) {
     const params = { ...googleParams };
     // Overrides this.baseUrl during this.request calls.
-    const baseUrl = `https://api.ggogle.maps/services/`;
+    const baseUrl = `https://api.google.maps/services/`;
     const response = this.get(`geolocation`, { baseUrl, params });
     return Promise.resolve(response);
   }
