@@ -2,13 +2,13 @@
 
 Abstracció d'una API basada en el paquet `axios` per implementar en el runtime de NodeJS.
 
-> Si el projecte necessita implementar un websocket, aleshores és millor instal·lar el package `@metacodi/node-ws-client` que també implementa les funcionalitats per realitzar consultes a una api de backend a més de les pròpies d'un websocket.
+> Si el projecte necessita implementar un websocket `socket.io`, aleshores és millor instal·lar el package `@metacodi/node-ws-io-client` que també implementa les funcionalitats per realitzar consultes a una api de backend a més de les pròpies d'un websocket.
 
 
 ## Install
 
 ```sh
-npm i @metacodi@node-api-client
+npm i @metacodi/node-api-client
 ```
 
 ## Use
