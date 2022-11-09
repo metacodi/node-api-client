@@ -204,10 +204,10 @@ export abstract class ApiClient {
     }
     const data: any = response.data;
     // Api d'exchanges.
-    if (data?.msg) { errorMessage.message = `${errorMessage.message} ${data.msg}${data.msg.endsWith('.') ? '' : '.'}`; }
+    if (data?.msg) { errorMessage.message = `${errorMessage.message || ''} ${data.msg}${data.msg.endsWith('.') ? '' : '.'}`.trim(); }
     // Api de metacodi.
     if (!!data?.http_code && !!data.message) {
-      if (data.message) { errorMessage.message = `${errorMessage.message} ${data.message}${data.message.endsWith('.') ? '' : '.'}`; }
+      if (data.message) { errorMessage.message = `${errorMessage.message || ''} ${data.message}${data.message.endsWith('.') ? '' : '.'}`.trim(); }
       throw {
         code: errorMessage?.code || data.api_code || data.http_code,
         message: errorMessage?.message || data.message,

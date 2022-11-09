@@ -183,11 +183,11 @@ class ApiClient {
         }
         const data = response.data;
         if (data === null || data === void 0 ? void 0 : data.msg) {
-            errorMessage.message = `${errorMessage.message} ${data.msg}${data.msg.endsWith('.') ? '' : '.'}`;
+            errorMessage.message = `${errorMessage.message || ''} ${data.msg}${data.msg.endsWith('.') ? '' : '.'}`.trim();
         }
         if (!!(data === null || data === void 0 ? void 0 : data.http_code) && !!data.message) {
             if (data.message) {
-                errorMessage.message = `${errorMessage.message} ${data.message}${data.message.endsWith('.') ? '' : '.'}`;
+                errorMessage.message = `${errorMessage.message || ''} ${data.message}${data.message.endsWith('.') ? '' : '.'}`.trim();
             }
             throw {
                 code: (errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.code) || data.api_code || data.http_code,
