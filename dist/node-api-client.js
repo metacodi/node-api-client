@@ -175,6 +175,9 @@ class ApiClient {
     ;
     parseException(e, url, errorMessage) {
         const { response, request, message } = e;
+        if (!errorMessage) {
+            errorMessage = {};
+        }
         if (!response) {
             throw { code: 500, message: request ? e : message };
         }

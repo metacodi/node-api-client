@@ -197,6 +197,7 @@ export abstract class ApiClient {
 
   protected parseException(e: AxiosError, url: string, errorMessage: ApiRequestOptions['errorMessage']): any {
     const { response, request, message } = e;
+    if (!errorMessage) { errorMessage = {}; }
     // Si no hem rebut una resposta...
     if (!response) {
       throw { code: 500, message: request ? e : message };
