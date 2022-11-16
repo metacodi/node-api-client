@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApiClient = void 0;
 const axios_1 = __importDefault(require("axios"));
 const crypto_1 = require("crypto");
+const node_utils_1 = require("@metacodi/node-utils");
 class ApiClient {
     constructor(options) {
         this.options = Object.assign(Object.assign({}, this.defaultOptions), options);
@@ -39,47 +40,57 @@ class ApiClient {
     delete(endpoint, options) { return this.request('DELETE', endpoint, options); }
     request(method, endpoint, options) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!options) {
-                options = {};
-            }
-            const isPublic = options.isPublic === undefined ? false : !!options.isPublic;
-            const headers = options.headers === undefined ? undefined : options.headers;
-            const params = options.params === undefined ? undefined : options.params;
-            const encodeParams = options.encodeParams === undefined ? true : !!options.encodeParams;
-            const strictValidation = options.strictValidation === undefined ? false : options.strictValidation;
-            const timeout = options.timeout === undefined ? undefined : options.timeout;
-            const timeoutErrorMessage = options.timeoutErrorMessage === undefined ? undefined : options.timeoutErrorMessage;
-            const baseUrl = options.baseUrl || this.baseUrl();
-            const config = {
-                method,
-                headers: Object.assign({}, headers),
-            };
-            if (!!timeout) {
-                config.timeout = timeout;
-            }
-            if (!!timeoutErrorMessage) {
-                config.timeoutErrorMessage = timeoutErrorMessage;
-            }
-            const { body, query } = this.resolveData(method, params || {}, { encodeParams, strictValidation });
-            if (query) {
-                const concat = endpoint.includes('?') ? (endpoint.endsWith('?') ? '' : '&') : '?';
-                endpoint += concat + query;
-            }
-            if (method === 'POST' || method === 'PUT') {
-                config.data = body;
-            }
-            if (!isPublic) {
-                const authHeaders = yield this.getAuthHeaders(method, `/${endpoint}`, body);
-                config.headers = Object.assign(Object.assign({}, config.headers), authHeaders);
-            }
-            const protocol = baseUrl.startsWith('http') ? '' : 'https://';
-            config.url = protocol + [baseUrl, endpoint].join('/');
-            return (0, axios_1.default)(config).then(response => {
-                if (response.status !== 200) {
-                    throw response;
+            try {
+                if (!options) {
+                    options = {};
                 }
-                return response.data;
-            }).catch(e => this.parseException(e, config.url, options.errorMessage));
+                const isPublic = options.isPublic === undefined ? false : !!options.isPublic;
+                const headers = options.headers === undefined ? undefined : options.headers;
+                const params = options.params === undefined ? undefined : options.params;
+                const encodeParams = options.encodeParams === undefined ? true : !!options.encodeParams;
+                const strictValidation = options.strictValidation === undefined ? false : options.strictValidation;
+                const timeout = options.timeout === undefined ? undefined : options.timeout;
+                const timeoutErrorMessage = options.timeoutErrorMessage === undefined ? undefined : options.timeoutErrorMessage;
+                const baseUrl = options.baseUrl || this.baseUrl();
+                const config = {
+                    method,
+                    headers: Object.assign({}, headers),
+                };
+                if (!!timeout) {
+                    config.timeout = timeout;
+                }
+                if (!!timeoutErrorMessage) {
+                    config.timeoutErrorMessage = timeoutErrorMessage;
+                }
+                const { body, query } = this.resolveData(method, params || {}, { encodeParams, strictValidation });
+                if (query) {
+                    const concat = endpoint.includes('?') ? (endpoint.endsWith('?') ? '' : '&') : '?';
+                    endpoint += concat + query;
+                }
+                if (method === 'POST' || method === 'PUT') {
+                    config.data = body;
+                }
+                if (!isPublic) {
+                    try {
+                        const authHeaders = yield this.getAuthHeaders(method, `/${endpoint}`, body);
+                        config.headers = Object.assign(Object.assign({}, config.headers), authHeaders);
+                    }
+                    catch (error) {
+                        throw (0, node_utils_1.concatError)(error, `Error establint els headers d'autenticació del client API.`);
+                    }
+                }
+                const protocol = baseUrl.startsWith('http') ? '' : 'https://';
+                config.url = protocol + [baseUrl, endpoint].join('/');
+                return (0, axios_1.default)(config).then(response => {
+                    if (response.status !== 200) {
+                        throw response;
+                    }
+                    return response.data;
+                }).catch(e => this.parseException(e, config.url, options.errorMessage));
+            }
+            catch (error) {
+                throw (0, node_utils_1.concatError)(error, `Error executant la consulta del client API.`);
+            }
         });
     }
     resolveData(method, data = {}, options) {
@@ -159,17 +170,22 @@ class ApiClient {
     ;
     signMessage(message, secret) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof crypto_1.createHmac === 'function') {
-                return (0, crypto_1.createHmac)('sha256', secret).update(message).digest('base64');
+            try {
+                if (typeof crypto_1.createHmac === 'function') {
+                    return (0, crypto_1.createHmac)('sha256', secret).update(message).digest('base64');
+                }
+                const encoder = new TextEncoder();
+                const keyData = encoder.encode(secret);
+                const algorithm = { name: 'HMAC', hash: { name: 'SHA-256' } };
+                const extractable = false;
+                const keyUsages = ['sign'];
+                const key = yield window.crypto.subtle.importKey('raw', keyData, algorithm, extractable, keyUsages);
+                const signature = yield window.crypto.subtle.sign('HMAC', key, encoder.encode(message));
+                return Buffer.from(signature).toString('base64');
             }
-            const encoder = new TextEncoder();
-            const keyData = encoder.encode(secret);
-            const algorithm = { name: 'HMAC', hash: { name: 'SHA-256' } };
-            const extractable = false;
-            const keyUsages = ['sign'];
-            const key = yield window.crypto.subtle.importKey('raw', keyData, algorithm, extractable, keyUsages);
-            const signature = yield window.crypto.subtle.sign('HMAC', key, encoder.encode(message));
-            return Buffer.from(signature).toString('base64');
+            catch (error) {
+                throw (0, node_utils_1.concatError)(error, `Error creant la signatura d'autenticació del client API.`);
+            }
         });
     }
     ;
