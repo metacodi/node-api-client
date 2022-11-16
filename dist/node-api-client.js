@@ -89,7 +89,8 @@ class ApiClient {
                 }).catch(e => this.parseException(e, config.url, options.errorMessage));
             }
             catch (error) {
-                throw (0, node_utils_1.concatError)(error, `Error executant la consulta del client API.`);
+                const url = (endpoint || '').split('?')[0];
+                throw (0, node_utils_1.concatError)(error, `Error executant la consulta ${method} ${url} del client API.`);
             }
         });
     }

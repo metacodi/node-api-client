@@ -114,7 +114,8 @@ export abstract class ApiClient {
       }).catch(e => this.parseException(e, config.url, options.errorMessage));
 
     } catch (error: any) {
-      throw concatError(error, `Error executant la consulta del client API.`);
+      const url = (endpoint || '').split('?')[0];
+      throw concatError(error, `Error executant la consulta ${method} ${url} del client API.`);
     }
   }
 
