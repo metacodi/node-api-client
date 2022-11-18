@@ -211,7 +211,7 @@ class ApiClient {
                 message: (errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.message) || data.message,
             };
         }
-        throw Object.assign(Object.assign({}, errorMessage), { requestCode: response.status, requestMessage: response.statusText, body: response.data, headers: response.headers, requestUrl: url, requestBody: request.body, options: Object.assign({}, this.options) });
+        throw Object.assign(Object.assign({}, errorMessage), { requestCode: response.status, requestMessage: response.statusText, body: response.data, headers: response.headers, requestUrl: url, requestBody: request.body });
     }
 }
 exports.ApiClient = ApiClient;

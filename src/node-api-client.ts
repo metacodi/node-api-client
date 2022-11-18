@@ -239,7 +239,6 @@ export abstract class ApiClient {
       headers: response.headers,
       requestUrl: url,
       requestBody: request.body,
-      options: { ...this.options },
     };
   }
 
