@@ -109,7 +109,7 @@ export abstract class ApiClient {
   
       return axios(config).then(response => {
         // console.log(config.url, response);
-        if (response.status !== 200) { throw response; }
+        if (response.status >= 300) { throw response; }
         return response.data;
       }).catch(e => this.parseException(e, config.url, options.errorMessage));
 
