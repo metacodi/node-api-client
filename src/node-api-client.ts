@@ -111,7 +111,13 @@ export abstract class ApiClient {
         // console.log(config.url, response);
         if (response.status >= 300) { throw response; }
         return response.data;
-      }).catch(e => this.parseException(e, config.url, options.errorMessage));
+      }).catch(e => {
+        try {
+          this.parseException(e, config.url, options.errorMessage);
+        } catch (error: any) {
+          throw error;
+        }
+      });
 
     } catch (error: any) {
       const url = (endpoint || '').split('?')[0];
@@ -218,7 +224,7 @@ export abstract class ApiClient {
     if (!errorMessage) { errorMessage = {}; }
     // Si no hem rebut una resposta...
     if (!response) {
-      return { code: 500, message: request ? e : message };
+      throw { code: 500, message: request ? e : message };
     }
     const data: any = response.data;
     // Api d'exchanges.
@@ -226,12 +232,12 @@ export abstract class ApiClient {
     // Api de metacodi.
     if (!!data?.http_code && !!data.message) {
       if (data.message) { errorMessage.message = `${errorMessage.message || ''} ${data.message}${data.message.endsWith('.') ? '' : '.'}`.trim(); }
-      return {
+      throw {
         code: errorMessage?.code || data.api_code || data.http_code,
         message: errorMessage?.message || data.message,
       }
     }
-    return {
+    throw {
       ...errorMessage,
       requestCode: response.status,
       requestMessage: response.statusText,
