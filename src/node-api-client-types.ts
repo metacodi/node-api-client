@@ -23,7 +23,7 @@ export interface ApiRequestOptions {
   /** List of query params (GET | DELETE) or json body (POST | PUT) for the request. */
   params?: any;
   headers?: { [key: string]: string | number };
-  /** If false is set, getAuthHeaders() is automatically called. To avoid this, you must override this method in the inherited class. */
+  /** If `false` is set, `getAuthHeaders()` is automatically called. To avoid this, you must override this method in the inherited class. */
   isPublic?: boolean;
   errorMessage?: { code?: number; message?: string; };
   /** Timeout in ms => 1000 * 60 * 5 <=> 5 min. */

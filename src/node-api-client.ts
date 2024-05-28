@@ -1,7 +1,8 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import https from 'https';
 import { createHmac } from 'crypto';
 
-import { concatError } from '@metacodi/node-utils';
+import { Terminal, concatError } from '@metacodi/node-utils';
 
 import { ApiClientOptions, ApiRequestOptions, HttpMethod } from './node-api-client-types';
 
@@ -111,11 +112,209 @@ export abstract class ApiClient {
         // console.log(config.url, response);
         if (response.status >= 300) { throw response; }
         return response.data;
-      }).catch(e => { throw this.parseException(e, config.url, options.errorMessage); });
+      }).catch(e => this.parseAxiosException(e, config.url, options.errorMessage));
+
+      // const splitted = this.splitURL(config.url);
+
+      // // const httpHeaders: OutgoingHttpHeaders = { ...config.headers as { [header: string]: number | string } };
+      // const opts: https.RequestOptions = {
+      //   method,
+      //   hostname: splitted.hostname,
+      //   // port: splitted.port,
+      //   path: `${splitted.path}${splitted.query}`,
+      //   // query: splitted.query,
+      //   protocol: splitted.protocol || 'https:',
+      //   sessionTimeout: 30, /* in seconds */
+      //   headers: { ...config.headers as { [header: string]: number | string } },
+      // };
+
+      // const parseResponse = (data: any[]) => {
+      //   const response = Buffer.concat(data).toString();
+      //   try {
+      //     const json = JSON.parse(response);
+      //     return json;
+      //   } catch(error: any) {
+      //     return response;
+      //   }
+      // }
+      
+      // return new Promise<any>((resolve: any, reject: any) => {        
+      //   https.request(opts, (res) => {
+      //     console.log('statusCode:', res.statusCode);
+      //     console.log('headers:', res.headers);
+      //     let data: any[] = [];
+      //     res.on('data', chunk => {
+      //       process.stdout.write(chunk);
+      //       data.push(chunk);
+      //     });
+      //     res.on('end', () => {
+      //       const response = parseResponse(data);
+      //       if (res.statusCode < 300) {
+      //         resolve(response);
+      //         // const response = Buffer.concat(data).toString();
+      //         // try {
+      //         //   const json = JSON.parse(response);
+      //         //   resolve(json);
+      //         // } catch(error: any) {
+      //         //   resolve(response);
+      //         // }
+      //       } else {
+      //         throw response;              
+      //       }
+      //       // console.log('Response ended: ', response);
+      //     });
+      //   }).on('error', error => {
+      //     console.error(error);
+      //     this.parseAxiosException(error as any, config.url, options.errorMessage);
+      //     // reject(error);
+      //   }).end();
+      // });
 
     } catch (error: any) {
       const url = (endpoint || '').split('?')[0];
       throw concatError(error, `Error executant la consulta ${method} ${url} del client API.`);
+    }
+  }
+
+  async requestSync(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any> {
+    try {
+      if (!options) { options = {}; }
+      const isPublic = options.isPublic === undefined ? false : !!options.isPublic;
+      const headers = options.headers === undefined ? undefined : options.headers;
+      const params = options.params === undefined ? undefined : options.params;
+      const encodeParams = options.encodeParams === undefined ? true : !!options.encodeParams;
+      const strictValidation = options.strictValidation === undefined ? false : options.strictValidation;
+      const timeout = options.timeout === undefined ? undefined : options.timeout;
+      const timeoutErrorMessage = options.timeoutErrorMessage === undefined ? undefined : options.timeoutErrorMessage;
+  
+      const baseUrl = options.baseUrl || this.baseUrl();
+  
+      const config: AxiosRequestConfig<any> = {
+        method,
+        headers: { ...headers as any },
+      };
+  
+      if (!!timeout) { config.timeout = timeout; }
+      if (!!timeoutErrorMessage) { config.timeoutErrorMessage = timeoutErrorMessage; }
+  
+      const { body, query } = this.resolveData(method, params || {}, { encodeParams, strictValidation });
+  
+      if (query) {
+        const concat = endpoint.includes('?') ? (endpoint.endsWith('?') ? '' : '&') : '?';
+        endpoint += concat + query;
+      }
+  
+      if (method === 'POST' || method === 'PUT') {
+        config.data = body;
+      }
+
+      // if (!isPublic) {
+      //   try {
+      //     const authHeaders = await this.getAuthHeaders(method, `/${endpoint}`, body);
+      //     config.headers = { ...config.headers, ...authHeaders } as any;
+  
+      //   } catch (error: any) {
+      //     throw concatError(error, `Error establint els headers d'autenticació del client API.`);
+      //   }
+      // }
+  
+      const protocol = baseUrl.startsWith('http') ? '' : 'https://';
+      config.url = protocol + [baseUrl, endpoint].join('/');
+  
+      // console.log(config);
+ 
+      return axios(config).then(response => {
+        // console.log(config.url, response);
+        if (response.status >= 300) { throw response; }
+        return response.data;
+      }).catch(e => this.parseAxiosException(e, config.url, options.errorMessage));
+
+      // const splitted = this.splitURL(config.url);
+
+      // // const httpHeaders: OutgoingHttpHeaders = { ...config.headers as { [header: string]: number | string } };
+      // const opts: https.RequestOptions = {
+      //   method,
+      //   hostname: splitted.hostname,
+      //   // port: splitted.port,
+      //   path: `${splitted.path}${splitted.query}`,
+      //   // query: splitted.query,
+      //   protocol: splitted.protocol || 'https:',
+      //   sessionTimeout: 30, /* in seconds */
+      //   headers: { ...config.headers as { [header: string]: number | string } },
+      // };
+
+      // const parseResponse = (data: any[]) => {
+      //   const response = Buffer.concat(data).toString();
+      //   try {
+      //     const json = JSON.parse(response);
+      //     return json;
+      //   } catch(error: any) {
+      //     return response;
+      //   }
+      // }
+      
+      // return new Promise<any>((resolve: any, reject: any) => {        
+      //   https.request(opts, (res) => {
+      //     console.log('statusCode:', res.statusCode);
+      //     console.log('headers:', res.headers);
+      //     let data: any[] = [];
+      //     res.on('data', chunk => {
+      //       process.stdout.write(chunk);
+      //       data.push(chunk);
+      //     });
+      //     res.on('end', () => {
+      //       const response = parseResponse(data);
+      //       if (res.statusCode < 300) {
+      //         resolve(response);
+      //         // const response = Buffer.concat(data).toString();
+      //         // try {
+      //         //   const json = JSON.parse(response);
+      //         //   resolve(json);
+      //         // } catch(error: any) {
+      //         //   resolve(response);
+      //         // }
+      //       } else {
+      //         throw response;              
+      //       }
+      //       // console.log('Response ended: ', response);
+      //     });
+      //   }).on('error', error => {
+      //     console.error(error);
+      //     this.parseAxiosException(error as any, config.url, options.errorMessage);
+      //     // reject(error);
+      //   }).end();
+      // });
+
+    } catch (error: any) {
+      const url = (endpoint || '').split('?')[0];
+      throw concatError(error, `Error executant la consulta ${method} ${url} del client API.`);
+    }
+  }
+
+  protected splitURL(url: string) {
+    // Ex: 'https://test.typicode.com/users/dom?query=12&foo=bar' => [
+    //   "https://www.google.com:80/users/dom?query=12&foo=bar",
+    //   'https://',
+    //   "www.google.com",
+    //   ':80',
+    //   "/users/dom",
+    //   "?query=12&foo=bar",
+    // ];
+    // Ex: 'test.typicode.com/users/dom?query=12&foo=bar' => [
+    //   "www.google.com/users/dom?query=12&foo=bar",
+    //   undefined,
+    //   "www.google.com",
+    //   undefined,
+    //   "/users/dom",
+    //   "?query=12&foo=bar",
+    // ];
+    const res = /^(https:\/\/|http:\/\/)?([^\/]*)(:\d+)?([^?]*)(.*)/gi.exec(url);
+    return {
+      protocol: res[1].replace(/\/\/$/gi, '') || '',
+      hostname: res[2] || '',
+      port: (res[3] || '').replace(':', ''),
+      path: res[4] || '',
+      query: (res[5] || ''),
     }
   }
 
@@ -213,12 +412,12 @@ export abstract class ApiClient {
     }
   };
 
-  protected parseException(e: AxiosError, url: string, errorMessage: ApiRequestOptions['errorMessage']): any {
+  protected parseAxiosException(e: AxiosError, url: string, errorMessage: ApiRequestOptions['errorMessage']): any {
     const { response, request, message } = e;
     if (!errorMessage) { errorMessage = {}; }
     // Si no hem rebut una resposta...
     if (!response) {
-      return { code: 500, message: request ? e : message };
+      throw { code: 500, message: request ? e : message };
     }
     const data: any = response.data;
     // Api d'exchanges.
@@ -226,12 +425,12 @@ export abstract class ApiClient {
     // Api de metacodi.
     if (!!data?.http_code && !!data.message) {
       if (data.message) { errorMessage.message = `${errorMessage.message || ''} ${data.message}${data.message.endsWith('.') ? '' : '.'}`.trim(); }
-      return {
+      throw {
         code: errorMessage?.code || data.api_code || data.http_code,
         message: errorMessage?.message || data.message,
       }
     }
-    return {
+    throw {
       ...errorMessage,
       requestCode: response.status,
       requestMessage: response.statusText,
@@ -243,3 +442,70 @@ export abstract class ApiClient {
   }
 
 }
+
+
+// // ---------------------------------------------------------------------------------------------------
+// //  test
+// // ---------------------------------------------------------------------------------------------------
+// //  npx ts-node src/node-api-client.ts
+// // ---------------------------------------------------------------------------------------------------
+
+
+// export class TestApiClient extends ApiClient {
+//   debug = false;
+
+//   constructor(
+//     public options: ApiClientOptions & { apiBaseUrl?: string; apiIdUser?: number },
+//   ) {
+//     super(options);
+//     console.log('options =>', options);
+//   }
+
+
+//   // ---------------------------------------------------------------------------------------------------
+//   //  ApiClient implementation
+//   // ---------------------------------------------------------------------------------------------------
+
+//   override baseUrl(): string { return this.options?.apiBaseUrl || ''; }
+
+//   protected override async getAuthHeaders(method: HttpMethod, endpoint: string, params: any) {
+//     return {
+//       'Authorization': 'SERVER',
+//       'Authorization-User': this.options?.apiIdUser || 1,
+//     };
+//   }
+
+//   override async request(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any> {
+//     if (!options) { options = {}; } 
+//     options.headers = options.headers || {};
+//     options.headers['Content-Type'] = 'application/json';
+//     return super.request(method, endpoint, options);
+//   }
+
+// }
+
+// const test = async () => {
+//   Terminal.title(`Testing ApiClient`)
+
+//   const options: ApiClientOptions & { apiBaseUrl?: string; apiIdUser?: number} = {
+//     apiBaseUrl: 'https://scrownet.metacodi.com/dev/api',
+//     apiIdUser: 9,
+//   }
+
+//   try {
+
+//     const api = new TestApiClient(options);
+  
+//     const params: ApiRequestOptions = { params: { AND: [['idEntidad', '=', 8], ['idProveedor', 'is', null], ['idCliente', 'is', null]] } };
+  
+//     const cuentas = await api.post(`search/cuentas?rel=entidad,divisa`, params);
+    
+//     Terminal.success(cuentas);
+
+//   } catch (error: any) {
+//     Terminal.error(error, /* exit */ false);
+//   }
+
+// };
+
+// test();

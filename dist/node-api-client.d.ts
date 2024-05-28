@@ -19,6 +19,14 @@ export declare abstract class ApiClient {
     put(endpoint: string, options?: ApiRequestOptions): Promise<any>;
     delete(endpoint: string, options?: ApiRequestOptions): Promise<any>;
     request(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any>;
+    requestSync(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any>;
+    protected splitURL(url: string): {
+        protocol: string;
+        hostname: string;
+        port: string;
+        path: string;
+        query: string;
+    };
     protected resolveData(method: HttpMethod, data?: {
         [key: string]: any;
     }, options?: {
@@ -40,6 +48,6 @@ export declare abstract class ApiClient {
         strictValidation?: boolean;
     }): string;
     signMessage(message: string, secret: string): Promise<string>;
-    protected parseException(e: AxiosError, url: string, errorMessage: ApiRequestOptions['errorMessage']): any;
+    protected parseAxiosException(e: AxiosError, url: string, errorMessage: ApiRequestOptions['errorMessage']): any;
 }
 //# sourceMappingURL=node-api-client.d.ts.map

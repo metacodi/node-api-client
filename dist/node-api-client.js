@@ -86,13 +86,70 @@ class ApiClient {
                         throw response;
                     }
                     return response.data;
-                }).catch(e => { throw this.parseException(e, config.url, options.errorMessage); });
+                }).catch(e => this.parseAxiosException(e, config.url, options.errorMessage));
             }
             catch (error) {
                 const url = (endpoint || '').split('?')[0];
                 throw (0, node_utils_1.concatError)(error, `Error executant la consulta ${method} ${url} del client API.`);
             }
         });
+    }
+    requestSync(method, endpoint, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                if (!options) {
+                    options = {};
+                }
+                const isPublic = options.isPublic === undefined ? false : !!options.isPublic;
+                const headers = options.headers === undefined ? undefined : options.headers;
+                const params = options.params === undefined ? undefined : options.params;
+                const encodeParams = options.encodeParams === undefined ? true : !!options.encodeParams;
+                const strictValidation = options.strictValidation === undefined ? false : options.strictValidation;
+                const timeout = options.timeout === undefined ? undefined : options.timeout;
+                const timeoutErrorMessage = options.timeoutErrorMessage === undefined ? undefined : options.timeoutErrorMessage;
+                const baseUrl = options.baseUrl || this.baseUrl();
+                const config = {
+                    method,
+                    headers: Object.assign({}, headers),
+                };
+                if (!!timeout) {
+                    config.timeout = timeout;
+                }
+                if (!!timeoutErrorMessage) {
+                    config.timeoutErrorMessage = timeoutErrorMessage;
+                }
+                const { body, query } = this.resolveData(method, params || {}, { encodeParams, strictValidation });
+                if (query) {
+                    const concat = endpoint.includes('?') ? (endpoint.endsWith('?') ? '' : '&') : '?';
+                    endpoint += concat + query;
+                }
+                if (method === 'POST' || method === 'PUT') {
+                    config.data = body;
+                }
+                const protocol = baseUrl.startsWith('http') ? '' : 'https://';
+                config.url = protocol + [baseUrl, endpoint].join('/');
+                return (0, axios_1.default)(config).then(response => {
+                    if (response.status >= 300) {
+                        throw response;
+                    }
+                    return response.data;
+                }).catch(e => this.parseAxiosException(e, config.url, options.errorMessage));
+            }
+            catch (error) {
+                const url = (endpoint || '').split('?')[0];
+                throw (0, node_utils_1.concatError)(error, `Error executant la consulta ${method} ${url} del client API.`);
+            }
+        });
+    }
+    splitURL(url) {
+        const res = /^(https:\/\/|http:\/\/)?([^\/]*)(:\d+)?([^?]*)(.*)/gi.exec(url);
+        return {
+            protocol: res[1].replace(/\/\/$/gi, '') || '',
+            hostname: res[2] || '',
+            port: (res[3] || '').replace(':', ''),
+            path: res[4] || '',
+            query: (res[5] || ''),
+        };
     }
     resolveData(method, data = {}, options) {
         if (!options) {
@@ -190,13 +247,13 @@ class ApiClient {
         });
     }
     ;
-    parseException(e, url, errorMessage) {
+    parseAxiosException(e, url, errorMessage) {
         const { response, request, message } = e;
         if (!errorMessage) {
             errorMessage = {};
         }
         if (!response) {
-            return { code: 500, message: request ? e : message };
+            throw { code: 500, message: request ? e : message };
         }
         const data = response.data;
         if (data === null || data === void 0 ? void 0 : data.msg) {
@@ -206,12 +263,12 @@ class ApiClient {
             if (data.message) {
                 errorMessage.message = `${errorMessage.message || ''} ${data.message}${data.message.endsWith('.') ? '' : '.'}`.trim();
             }
-            return {
+            throw {
                 code: (errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.code) || data.api_code || data.http_code,
                 message: (errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.message) || data.message,
             };
         }
-        return Object.assign(Object.assign({}, errorMessage), { requestCode: response.status, requestMessage: response.statusText, body: response.data, headers: response.headers, requestUrl: url, requestBody: request.body });
+        throw Object.assign(Object.assign({}, errorMessage), { requestCode: response.status, requestMessage: response.statusText, body: response.data, headers: response.headers, requestUrl: url, requestBody: request.body });
     }
 }
 exports.ApiClient = ApiClient;
