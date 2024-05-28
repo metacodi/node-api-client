@@ -111,15 +111,18 @@ export abstract class ApiClient {
         // console.log(config.url, response);
         if (response.status >= 300) { throw response; }
         return response.data;
-      }).catch(e => {
-        try {
-          this.parseException(e, config.url, options.errorMessage);
-        } catch (error: any) {
-          throw error;
-        }
       });
+      // }).catch(e => {
+      //   try {
+      //     this.parseException(e, config.url, options.errorMessage);
+      //   } catch (error: any) {
+      //     throw error;
+      //   }
+      // });
 
-    } catch (error: any) {
+
+    } catch (err: any) {
+      const error = this.parseException(err, endpoint, options.errorMessage);
       const url = (endpoint || '').split('?')[0];
       throw concatError(error, `Error executant la consulta ${method} ${url} del client API.`);
     }
@@ -224,7 +227,7 @@ export abstract class ApiClient {
     if (!errorMessage) { errorMessage = {}; }
     // Si no hem rebut una resposta...
     if (!response) {
-      throw { code: 500, message: request ? e : message };
+      return { code: 500, message: request ? e : message };
     }
     const data: any = response.data;
     // Api d'exchanges.
@@ -232,12 +235,12 @@ export abstract class ApiClient {
     // Api de metacodi.
     if (!!data?.http_code && !!data.message) {
       if (data.message) { errorMessage.message = `${errorMessage.message || ''} ${data.message}${data.message.endsWith('.') ? '' : '.'}`.trim(); }
-      throw {
+      return {
         code: errorMessage?.code || data.api_code || data.http_code,
         message: errorMessage?.message || data.message,
       }
     }
-    throw {
+    return {
       ...errorMessage,
       requestCode: response.status,
       requestMessage: response.statusText,
