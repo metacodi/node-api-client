@@ -35,15 +35,7 @@ class ApiClient {
         this.options.apiPassphrase = data.apiPassphrase;
     }
     get(endpoint, options) { return this.request('GET', endpoint, options); }
-    post(endpoint, options) {
-        try {
-            return this.request('POST', endpoint, options);
-        }
-        catch (error) {
-            const url = (endpoint || '').split('?')[0];
-            throw (0, node_utils_1.concatError)(error, `Error executant la consulta POST ${url} del client API.`);
-        }
-    }
+    post(endpoint, options) { return this.request('POST', endpoint, options); }
     put(endpoint, options) { return this.request('PUT', endpoint, options); }
     delete(endpoint, options) { return this.request('DELETE', endpoint, options); }
     request(method, endpoint, options) {
@@ -89,14 +81,12 @@ class ApiClient {
                 }
                 const protocol = baseUrl.startsWith('http') ? '' : 'https://';
                 config.url = protocol + [baseUrl, endpoint].join('/');
-                return new Promise((resolve, reject) => {
-                    (0, axios_1.default)(config).then(response => {
-                        if (response.status >= 300) {
-                            throw response;
-                        }
-                        resolve(response.data);
-                    }).catch(e => reject(this.parseException(e, config.url, options.errorMessage)));
-                });
+                return (0, axios_1.default)(config).then(response => {
+                    if (response.status >= 300) {
+                        throw response;
+                    }
+                    return response.data;
+                }).catch(e => { throw this.parseException(e, config.url, options.errorMessage); });
             }
             catch (error) {
                 const url = (endpoint || '').split('?')[0];
