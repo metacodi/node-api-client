@@ -81,17 +81,17 @@ class ApiClient {
                 }
                 const protocol = baseUrl.startsWith('http') ? '' : 'https://';
                 config.url = protocol + [baseUrl, endpoint].join('/');
-                axios_1.default.interceptors.response.use(function (response) {
+                axios_1.default.interceptors.response.use(response => {
                     return response;
-                }, function (error) {
-                    return Promise.reject(error);
+                }, error => {
+                    this.parseException(error, config.url, options.errorMessage);
                 });
                 return (0, axios_1.default)(config).then(response => {
                     if (response.status >= 300) {
                         throw response;
                     }
                     return response.data;
-                }).catch(e => this.parseException(e, config.url, options.errorMessage));
+                }).catch(e => { });
             }
             catch (error) {
                 const url = (endpoint || '').split('?')[0];
