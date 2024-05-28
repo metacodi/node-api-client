@@ -196,7 +196,7 @@ class ApiClient {
             errorMessage = {};
         }
         if (!response) {
-            throw { code: 500, message: request ? e : message };
+            return { code: 500, message: request ? e : message };
         }
         const data = response.data;
         if (data === null || data === void 0 ? void 0 : data.msg) {
@@ -206,12 +206,12 @@ class ApiClient {
             if (data.message) {
                 errorMessage.message = `${errorMessage.message || ''} ${data.message}${data.message.endsWith('.') ? '' : '.'}`.trim();
             }
-            throw {
+            return {
                 code: (errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.code) || data.api_code || data.http_code,
                 message: (errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.message) || data.message,
             };
         }
-        throw Object.assign(Object.assign({}, errorMessage), { requestCode: response.status, requestMessage: response.statusText, body: response.data, headers: response.headers, requestUrl: url, requestBody: request.body });
+        return Object.assign(Object.assign({}, errorMessage), { requestCode: response.status, requestMessage: response.statusText, body: response.data, headers: response.headers, requestUrl: url, requestBody: request.body });
     }
 }
 exports.ApiClient = ApiClient;
