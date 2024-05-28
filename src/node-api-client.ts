@@ -49,7 +49,16 @@ export abstract class ApiClient {
 
   public get(endpoint: string, options?: ApiRequestOptions): Promise<any> { return this.request('GET', endpoint, options); }
 
-  public post(endpoint: string, options?: ApiRequestOptions): Promise<any> { return this.request('POST', endpoint, options); }
+  // public post(endpoint: string, options?: ApiRequestOptions): Promise<any> { return this.request('POST', endpoint, options); }
+  public post(endpoint: string, options?: ApiRequestOptions): Promise<any> {
+    try {
+      return this.request('POST', endpoint, options);
+    } catch (error: any) {
+      const url = (endpoint || '').split('?')[0];
+      throw concatError(error, `Error executant la consulta POST ${url} del client API.`);
+    }
+
+  }
 
   public put(endpoint: string, options?: ApiRequestOptions): Promise<any> { return this.request('PUT', endpoint, options); }
 

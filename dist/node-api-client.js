@@ -35,7 +35,15 @@ class ApiClient {
         this.options.apiPassphrase = data.apiPassphrase;
     }
     get(endpoint, options) { return this.request('GET', endpoint, options); }
-    post(endpoint, options) { return this.request('POST', endpoint, options); }
+    post(endpoint, options) {
+        try {
+            return this.request('POST', endpoint, options);
+        }
+        catch (error) {
+            const url = (endpoint || '').split('?')[0];
+            throw (0, node_utils_1.concatError)(error, `Error executant la consulta POST ${url} del client API.`);
+        }
+    }
     put(endpoint, options) { return this.request('PUT', endpoint, options); }
     delete(endpoint, options) { return this.request('DELETE', endpoint, options); }
     request(method, endpoint, options) {
