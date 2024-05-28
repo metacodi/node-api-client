@@ -116,24 +116,26 @@ export abstract class ApiClient {
   
       // console.log(config);
  
-      // Add a response interceptor
-      axios.interceptors.response.use(response => {
-        // Any status code that lie within the range of 2xx cause this function to trigger
-        // Do something with response data
-        return response;
-      }, error => {
-        // Any status codes that falls outside the range of 2xx cause this function to trigger
-        // Do something with response error
-        // return Promise.reject(error);
-        this.parseException(error, config.url, options.errorMessage);
-      });
+      // // Add a response interceptor
+      // axios.interceptors.response.use(response => {
+      //   // Any status code that lie within the range of 2xx cause this function to trigger
+      //   // Do something with response data
+      //   return response;
+      // }, error => {
+      //   // Any status codes that falls outside the range of 2xx cause this function to trigger
+      //   // Do something with response error
+      //   // return Promise.reject(error);
+      //   this.parseException(error, config.url, options.errorMessage);
+      // });
 
-      return axios(config).then(response => {
-        // console.log(config.url, response);
-        if (response.status >= 300) { throw response; }
-        return response.data;
-      // }).catch(e => this.parseException(e, config.url, options.errorMessage));
-      }).catch(e => {});
+      return new Promise<any>((resolve: any, reject: any) => {
+        axios(config).then(response => {
+          // console.log(config.url, response);
+          if (response.status >= 300) { throw response; }
+          resolve(response.data);
+        // }).catch(e => this.parseException(e, config.url, options.errorMessage));
+        }).catch(e => reject(this.parseException(e, config.url, options.errorMessage)));
+      });
 
     } catch (error: any) {
       const url = (endpoint || '').split('?')[0];
