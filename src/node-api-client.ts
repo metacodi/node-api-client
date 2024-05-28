@@ -111,18 +111,9 @@ export abstract class ApiClient {
         // console.log(config.url, response);
         if (response.status >= 300) { throw response; }
         return response.data;
-      });
-      // }).catch(e => {
-      //   try {
-      //     this.parseException(e, config.url, options.errorMessage);
-      //   } catch (error: any) {
-      //     throw error;
-      //   }
-      // });
+      }).catch(e => Promise.reject(this.parseException(e, config.url, options.errorMessage)));
 
-
-    } catch (err: any) {
-      const error = this.parseException(err, endpoint, options.errorMessage);
+    } catch (error: any) {
       const url = (endpoint || '').split('?')[0];
       throw concatError(error, `Error executant la consulta ${method} ${url} del client API.`);
     }
