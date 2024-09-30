@@ -19,7 +19,7 @@ export declare abstract class ApiClient {
     put(endpoint: string, options?: ApiRequestOptions): Promise<any>;
     delete(endpoint: string, options?: ApiRequestOptions): Promise<any>;
     request(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any>;
-    requestSync(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any>;
+    requestSyncTestNotWorking(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): void;
     protected splitURL(url: string): {
         protocol: string;
         hostname: string;
@@ -49,5 +49,22 @@ export declare abstract class ApiClient {
     }): string;
     signMessage(message: string, secret: string): Promise<string>;
     protected parseAxiosException(e: AxiosError, url: string, errorMessage: ApiRequestOptions['errorMessage']): any;
+}
+export declare class TestApiClient extends ApiClient {
+    options: ApiClientOptions & {
+        apiBaseUrl?: string;
+        apiIdUser?: number;
+    };
+    debug: boolean;
+    constructor(options: ApiClientOptions & {
+        apiBaseUrl?: string;
+        apiIdUser?: number;
+    });
+    baseUrl(): string;
+    protected getAuthHeaders(method: HttpMethod, endpoint: string, params: any): Promise<{
+        Authorization: string;
+        'Authorization-User': number;
+    }>;
+    request(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any>;
 }
 //# sourceMappingURL=node-api-client.d.ts.map

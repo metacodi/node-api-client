@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ApiClient = void 0;
+exports.TestApiClient = exports.ApiClient = void 0;
 const axios_1 = __importDefault(require("axios"));
 const crypto_1 = require("crypto");
 const node_utils_1 = require("@metacodi/node-utils");
@@ -94,52 +94,44 @@ class ApiClient {
             }
         });
     }
-    requestSync(method, endpoint, options) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                if (!options) {
-                    options = {};
-                }
-                const isPublic = options.isPublic === undefined ? false : !!options.isPublic;
-                const headers = options.headers === undefined ? undefined : options.headers;
-                const params = options.params === undefined ? undefined : options.params;
-                const encodeParams = options.encodeParams === undefined ? true : !!options.encodeParams;
-                const strictValidation = options.strictValidation === undefined ? false : options.strictValidation;
-                const timeout = options.timeout === undefined ? undefined : options.timeout;
-                const timeoutErrorMessage = options.timeoutErrorMessage === undefined ? undefined : options.timeoutErrorMessage;
-                const baseUrl = options.baseUrl || this.baseUrl();
-                const config = {
-                    method,
-                    headers: Object.assign({}, headers),
-                };
-                if (!!timeout) {
-                    config.timeout = timeout;
-                }
-                if (!!timeoutErrorMessage) {
-                    config.timeoutErrorMessage = timeoutErrorMessage;
-                }
-                const { body, query } = this.resolveData(method, params || {}, { encodeParams, strictValidation });
-                if (query) {
-                    const concat = endpoint.includes('?') ? (endpoint.endsWith('?') ? '' : '&') : '?';
-                    endpoint += concat + query;
-                }
-                if (method === 'POST' || method === 'PUT') {
-                    config.data = body;
-                }
-                const protocol = baseUrl.startsWith('http') ? '' : 'https://';
-                config.url = protocol + [baseUrl, endpoint].join('/');
-                return (0, axios_1.default)(config).then(response => {
-                    if (response.status >= 300) {
-                        throw response;
-                    }
-                    return response.data;
-                }).catch(e => this.parseAxiosException(e, config.url, options.errorMessage));
+    requestSyncTestNotWorking(method, endpoint, options) {
+        try {
+            if (!options) {
+                options = {};
             }
-            catch (error) {
-                const url = (endpoint || '').split('?')[0];
-                throw (0, node_utils_1.concatError)(error, `Error executant la consulta ${method} ${url} del client API.`);
+            const isPublic = options.isPublic === undefined ? false : !!options.isPublic;
+            const headers = options.headers === undefined ? undefined : options.headers;
+            const params = options.params === undefined ? undefined : options.params;
+            const encodeParams = options.encodeParams === undefined ? true : !!options.encodeParams;
+            const strictValidation = options.strictValidation === undefined ? false : options.strictValidation;
+            const timeout = options.timeout === undefined ? undefined : options.timeout;
+            const timeoutErrorMessage = options.timeoutErrorMessage === undefined ? undefined : options.timeoutErrorMessage;
+            const baseUrl = options.baseUrl || this.baseUrl();
+            const config = {
+                method,
+                headers: Object.assign({}, headers),
+            };
+            if (!!timeout) {
+                config.timeout = timeout;
             }
-        });
+            if (!!timeoutErrorMessage) {
+                config.timeoutErrorMessage = timeoutErrorMessage;
+            }
+            const { body, query } = this.resolveData(method, params || {}, { encodeParams, strictValidation });
+            if (query) {
+                const concat = endpoint.includes('?') ? (endpoint.endsWith('?') ? '' : '&') : '?';
+                endpoint += concat + query;
+            }
+            if (method === 'POST' || method === 'PUT') {
+                config.data = body;
+            }
+            const protocol = baseUrl.startsWith('http') ? '' : 'https://';
+            config.url = protocol + [baseUrl, endpoint].join('/');
+        }
+        catch (error) {
+            const url = (endpoint || '').split('?')[0];
+            throw (0, node_utils_1.concatError)(error, `Error executant la consulta ${method} ${url} del client API.`);
+        }
     }
     splitURL(url) {
         const res = /^(https:\/\/|http:\/\/)?([^\/]*)(:\d+)?([^?]*)(.*)/gi.exec(url);
@@ -272,4 +264,53 @@ class ApiClient {
     }
 }
 exports.ApiClient = ApiClient;
+class TestApiClient extends ApiClient {
+    constructor(options) {
+        super(options);
+        this.options = options;
+        this.debug = false;
+        console.log('options =>', options);
+    }
+    baseUrl() { var _a; return ((_a = this.options) === null || _a === void 0 ? void 0 : _a.apiBaseUrl) || ''; }
+    getAuthHeaders(method, endpoint, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            return {
+                'Authorization': 'SERVER',
+                'Authorization-User': ((_a = this.options) === null || _a === void 0 ? void 0 : _a.apiIdUser) || 1,
+            };
+        });
+    }
+    request(method, endpoint, options) {
+        const _super = Object.create(null, {
+            request: { get: () => super.request }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!options) {
+                options = {};
+            }
+            options.headers = options.headers || {};
+            options.headers['Content-Type'] = 'application/json';
+            return _super.request.call(this, method, endpoint, options);
+        });
+    }
+}
+exports.TestApiClient = TestApiClient;
+const test = () => __awaiter(void 0, void 0, void 0, function* () {
+    node_utils_1.Terminal.title(`Testing ApiClient`);
+    const options = {
+        apiBaseUrl: 'https://scrownet.metacodi.com/dev/api',
+        apiIdUser: 9,
+    };
+    try {
+        const api = new TestApiClient(options);
+        const params = { params: { AND: [['idEntidad', '=', 8], ['idProveedor', 'is', null], ['idCliente', 'is', null]] } };
+        const cuentas = yield api.post(`search/cuentas?rel=entidad,divisa`, params);
+        node_utils_1.Terminal.success(cuentas);
+    }
+    catch (error) {
+        node_utils_1.Terminal.error(error, false);
+    }
+});
+test();
 //# sourceMappingURL=node-api-client.js.map

@@ -107,68 +107,12 @@ export abstract class ApiClient {
       config.url = protocol + [baseUrl, endpoint].join('/');
   
       // console.log(config);
- 
+
       return axios(config).then(response => {
         // console.log(config.url, response);
         if (response.status >= 300) { throw response; }
         return response.data;
       }).catch(e => this.parseAxiosException(e, config.url, options.errorMessage));
-
-      // const splitted = this.splitURL(config.url);
-
-      // // const httpHeaders: OutgoingHttpHeaders = { ...config.headers as { [header: string]: number | string } };
-      // const opts: https.RequestOptions = {
-      //   method,
-      //   hostname: splitted.hostname,
-      //   // port: splitted.port,
-      //   path: `${splitted.path}${splitted.query}`,
-      //   // query: splitted.query,
-      //   protocol: splitted.protocol || 'https:',
-      //   sessionTimeout: 30, /* in seconds */
-      //   headers: { ...config.headers as { [header: string]: number | string } },
-      // };
-
-      // const parseResponse = (data: any[]) => {
-      //   const response = Buffer.concat(data).toString();
-      //   try {
-      //     const json = JSON.parse(response);
-      //     return json;
-      //   } catch(error: any) {
-      //     return response;
-      //   }
-      // }
-      
-      // return new Promise<any>((resolve: any, reject: any) => {        
-      //   https.request(opts, (res) => {
-      //     console.log('statusCode:', res.statusCode);
-      //     console.log('headers:', res.headers);
-      //     let data: any[] = [];
-      //     res.on('data', chunk => {
-      //       process.stdout.write(chunk);
-      //       data.push(chunk);
-      //     });
-      //     res.on('end', () => {
-      //       const response = parseResponse(data);
-      //       if (res.statusCode < 300) {
-      //         resolve(response);
-      //         // const response = Buffer.concat(data).toString();
-      //         // try {
-      //         //   const json = JSON.parse(response);
-      //         //   resolve(json);
-      //         // } catch(error: any) {
-      //         //   resolve(response);
-      //         // }
-      //       } else {
-      //         throw response;              
-      //       }
-      //       // console.log('Response ended: ', response);
-      //     });
-      //   }).on('error', error => {
-      //     console.error(error);
-      //     this.parseAxiosException(error as any, config.url, options.errorMessage);
-      //     // reject(error);
-      //   }).end();
-      // });
 
     } catch (error: any) {
       const url = (endpoint || '').split('?')[0];
@@ -176,7 +120,7 @@ export abstract class ApiClient {
     }
   }
 
-  async requestSync(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any> {
+  requestSyncTestNotWorking(method: HttpMethod, endpoint: string, options?: ApiRequestOptions) {
     try {
       if (!options) { options = {}; }
       const isPublic = options.isPublic === undefined ? false : !!options.isPublic;
@@ -223,11 +167,12 @@ export abstract class ApiClient {
   
       // console.log(config);
  
-      return axios(config).then(response => {
-        // console.log(config.url, response);
-        if (response.status >= 300) { throw response; }
-        return response.data;
-      }).catch(e => this.parseAxiosException(e, config.url, options.errorMessage));
+      // return axios(config).then(response => {
+      //   // console.log(config.url, response);
+      //   if (response.status >= 300) { throw response; }
+      //   return response.data;
+      // }).catch(e => this.parseAxiosException(e, config.url, options.errorMessage));
+
 
       // const splitted = this.splitURL(config.url);
 
@@ -444,68 +389,68 @@ export abstract class ApiClient {
 }
 
 
-// // ---------------------------------------------------------------------------------------------------
-// //  test
-// // ---------------------------------------------------------------------------------------------------
-// //  npx ts-node src/node-api-client.ts
-// // ---------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------
+//  test
+// ---------------------------------------------------------------------------------------------------
+//  npx ts-node src/node-api-client.ts
+// ---------------------------------------------------------------------------------------------------
 
 
-// export class TestApiClient extends ApiClient {
-//   debug = false;
+export class TestApiClient extends ApiClient {
+  debug = false;
 
-//   constructor(
-//     public options: ApiClientOptions & { apiBaseUrl?: string; apiIdUser?: number },
-//   ) {
-//     super(options);
-//     console.log('options =>', options);
-//   }
+  constructor(
+    public options: ApiClientOptions & { apiBaseUrl?: string; apiIdUser?: number },
+  ) {
+    super(options);
+    console.log('options =>', options);
+  }
 
 
-//   // ---------------------------------------------------------------------------------------------------
-//   //  ApiClient implementation
-//   // ---------------------------------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------
+  //  ApiClient implementation
+  // ---------------------------------------------------------------------------------------------------
 
-//   override baseUrl(): string { return this.options?.apiBaseUrl || ''; }
+  override baseUrl(): string { return this.options?.apiBaseUrl || ''; }
 
-//   protected override async getAuthHeaders(method: HttpMethod, endpoint: string, params: any) {
-//     return {
-//       'Authorization': 'SERVER',
-//       'Authorization-User': this.options?.apiIdUser || 1,
-//     };
-//   }
+  protected override async getAuthHeaders(method: HttpMethod, endpoint: string, params: any) {
+    return {
+      'Authorization': 'SERVER',
+      'Authorization-User': this.options?.apiIdUser || 1,
+    };
+  }
 
-//   override async request(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any> {
-//     if (!options) { options = {}; } 
-//     options.headers = options.headers || {};
-//     options.headers['Content-Type'] = 'application/json';
-//     return super.request(method, endpoint, options);
-//   }
+  override async request(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any> {
+    if (!options) { options = {}; } 
+    options.headers = options.headers || {};
+    options.headers['Content-Type'] = 'application/json';
+    return super.request(method, endpoint, options);
+  }
 
-// }
+}
 
-// const test = async () => {
-//   Terminal.title(`Testing ApiClient`)
+const test = async () => {
+  Terminal.title(`Testing ApiClient`)
 
-//   const options: ApiClientOptions & { apiBaseUrl?: string; apiIdUser?: number} = {
-//     apiBaseUrl: 'https://scrownet.metacodi.com/dev/api',
-//     apiIdUser: 9,
-//   }
+  const options: ApiClientOptions & { apiBaseUrl?: string; apiIdUser?: number} = {
+    apiBaseUrl: 'https://scrownet.metacodi.com/dev/api',
+    apiIdUser: 9,
+  }
 
-//   try {
+  try {
 
-//     const api = new TestApiClient(options);
+    const api = new TestApiClient(options);
   
-//     const params: ApiRequestOptions = { params: { AND: [['idEntidad', '=', 8], ['idProveedor', 'is', null], ['idCliente', 'is', null]] } };
+    const params: ApiRequestOptions = { params: { AND: [['idEntidad', '=', 8], ['idProveedor', 'is', null], ['idCliente', 'is', null]] } };
   
-//     const cuentas = await api.post(`search/cuentas?rel=entidad,divisa`, params);
+    const cuentas = await api.post(`search/cuentas?rel=entidad,divisa`, params);
     
-//     Terminal.success(cuentas);
+    Terminal.success(cuentas);
 
-//   } catch (error: any) {
-//     Terminal.error(error, /* exit */ false);
-//   }
+  } catch (error: any) {
+    Terminal.error(error, /* exit */ false);
+  }
 
-// };
+};
 
-// test();
+test();

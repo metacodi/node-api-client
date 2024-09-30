@@ -21,6 +21,7 @@ const exec = async (endpoint: string, options?: any) => {
   const cuentas = await api.post(`search/cuentas?rel=entidad,divisa`, params);
   return cuentas;
 }
+
 const test = async () => {
   Terminal.title(`Testing ApiClient`)
 
