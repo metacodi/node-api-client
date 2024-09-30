@@ -312,5 +312,4 @@ const test = () => __awaiter(void 0, void 0, void 0, function* () {
         node_utils_1.Terminal.error(error, false);
     }
 });
-test();
 //# sourceMappingURL=node-api-client.js.map
