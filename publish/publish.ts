@@ -34,8 +34,8 @@ if (options.verbose) { console.log('Arguments: ', options); }
     Resource.removeSync(`dist`);
   }
 
-  // Terminal.log(`Actualitzant dependències de ${chalk.bold(`@metacodi`)}`);  
-  // await upgradeDependency(`@metacodi/node-utils`, '--save-peer');
+  Terminal.log(`Actualitzant dependències de ${chalk.bold(`@metacodi`)}`);  
+  await upgradeDependency(`@metacodi/node-utils`, '--save-peer');
 
   Terminal.log(chalk.bold(`Compilant projecte typescript`));
   await Terminal.run(`tsc`);
