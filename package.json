@@ -1,6 +1,6 @@
 {
   "name": "@metacodi/node-api-client",
-  "version": "1.0.36",
+  "version": "1.0.37",
   "description": "Axios Node Api Client",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,7 +35,7 @@
   "homepage": "https://github.com/metacodi/node-api-client#readme",
   "license": "ISC",
   "peerDependencies": {
-    "@metacodi/node-utils": "^1.0.46",
+    "@metacodi/node-utils": "^1.0.47",
     "axios": "^1.7.2"
   },
   "devDependencies": {
