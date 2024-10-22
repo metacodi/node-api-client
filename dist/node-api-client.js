@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TestApiClient = exports.ApiClient = void 0;
 const axios_1 = __importDefault(require("axios"));
 const crypto_1 = require("crypto");
-const node_utils_1 = require("@metacodi/node-utils");
+const functions_1 = require("./functions");
 class ApiClient {
     constructor(options) {
         this.options = Object.assign(Object.assign({}, this.defaultOptions), options);
@@ -30,9 +30,7 @@ class ApiClient {
         };
     }
     setCredentials(data) {
-        this.options.apiKey = data.apiKey;
-        this.options.apiSecret = data.apiSecret;
-        this.options.apiPassphrase = data.apiPassphrase;
+        this.options = Object.assign(Object.assign({}, this.options), data);
     }
     get(endpoint, options) { return this.request('GET', endpoint, options); }
     post(endpoint, options) { return this.request('POST', endpoint, options); }
@@ -76,7 +74,7 @@ class ApiClient {
                         config.headers = Object.assign(Object.assign({}, config.headers), authHeaders);
                     }
                     catch (error) {
-                        throw (0, node_utils_1.concatError)(error, `Error establint els headers d'autenticació del client API.`);
+                        throw (0, functions_1.concatError)(error, `Error establint els headers d'autenticació del client API.`);
                     }
                 }
                 const protocol = baseUrl.startsWith('http') ? '' : 'https://';
@@ -90,7 +88,7 @@ class ApiClient {
             }
             catch (error) {
                 const url = (endpoint || '').split('?')[0];
-                throw (0, node_utils_1.concatError)(error, `Error executant la consulta ${method} ${url} del client API.`);
+                throw (0, functions_1.concatError)(error, `Error executant la consulta ${method} ${url} del client API.`);
             }
         });
     }
@@ -130,7 +128,7 @@ class ApiClient {
         }
         catch (error) {
             const url = (endpoint || '').split('?')[0];
-            throw (0, node_utils_1.concatError)(error, `Error executant la consulta ${method} ${url} del client API.`);
+            throw (0, functions_1.concatError)(error, `Error executant la consulta ${method} ${url} del client API.`);
         }
     }
     splitURL(url) {
@@ -234,7 +232,7 @@ class ApiClient {
                 return Buffer.from(signature).toString('base64');
             }
             catch (error) {
-                throw (0, node_utils_1.concatError)(error, `Error creant la signatura d'autenticació del client API.`);
+                throw (0, functions_1.concatError)(error, `Error creant la signatura d'autenticació del client API.`);
             }
         });
     }
@@ -297,7 +295,7 @@ class TestApiClient extends ApiClient {
 }
 exports.TestApiClient = TestApiClient;
 const test = () => __awaiter(void 0, void 0, void 0, function* () {
-    node_utils_1.Terminal.title(`Testing ApiClient`);
+    console.log(`Testing ApiClient`);
     const options = {
         apiBaseUrl: 'https://scrownet.metacodi.com/dev/api',
         apiIdUser: 9,
@@ -306,10 +304,10 @@ const test = () => __awaiter(void 0, void 0, void 0, function* () {
         const api = new TestApiClient(options);
         const params = { params: { AND: [['idEntidad', '=', 8], ['idProveedor', 'is', null], ['idCliente', 'is', null]] } };
         const cuentas = yield api.post(`search/cuentas?rel=entidad,divisa`, params);
-        node_utils_1.Terminal.success(cuentas);
+        console.log(cuentas);
     }
     catch (error) {
-        node_utils_1.Terminal.error(error, false);
+        console.log("ERROR:", error);
     }
 });
 //# sourceMappingURL=node-api-client.js.map

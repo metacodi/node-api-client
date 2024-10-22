@@ -23,4 +23,9 @@ export interface ApiRequestOptions {
     timeout?: number;
     timeoutErrorMessage?: string;
 }
+export interface ErrorObject {
+    code?: number;
+    message: string;
+    data?: any;
+}
 //# sourceMappingURL=node-api-client-types.d.ts.map

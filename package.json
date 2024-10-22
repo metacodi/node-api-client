@@ -1,6 +1,6 @@
 {
   "name": "@metacodi/node-api-client",
-  "version": "1.0.37",
+  "version": "1.0.38",
   "description": "Axios Node Api Client",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,10 +35,10 @@
   "homepage": "https://github.com/metacodi/node-api-client#readme",
   "license": "ISC",
   "peerDependencies": {
-    "@metacodi/node-utils": "^1.0.47",
     "axios": "^1.7.2"
   },
   "devDependencies": {
+    "@metacodi/node-utils": "^1.0.47",
     "@types/ftp": "^0.3.36",
     "@types/node": "^20.16.10",
     "@typescript-eslint/eslint-plugin": "^7.18.0",

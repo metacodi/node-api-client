@@ -1,10 +1,8 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import https from 'https';
 import { createHmac } from 'crypto';
 
-import { Terminal, concatError } from '@metacodi/node-utils';
-
 import { ApiClientOptions, ApiRequestOptions, HttpMethod } from './node-api-client-types';
+import { concatError } from './functions';
 
 
 export abstract class ApiClient {
@@ -38,9 +36,10 @@ export abstract class ApiClient {
   }
 
   public setCredentials(data: { apiKey: string; apiSecret: string; apiPassphrase: string }): void {
-    this.options.apiKey = data.apiKey;
-    this.options.apiSecret = data.apiSecret;
-    this.options.apiPassphrase = data.apiPassphrase;
+    this.options = { ...this.options, ...data };
+    // this.options.apiKey = data.apiKey;
+    // this.options.apiSecret = data.apiSecret;
+    // this.options.apiPassphrase = data.apiPassphrase;
   }
 
 
@@ -237,7 +236,7 @@ export abstract class ApiClient {
   }
 
   protected splitURL(url: string) {
-    // Ex: 'https://test.typicode.com/users/dom?query=12&foo=bar' => [
+    // Ex: 'https://www.google.com/users/dom?query=12&foo=bar' => [
     //   "https://www.google.com:80/users/dom?query=12&foo=bar",
     //   'https://',
     //   "www.google.com",
@@ -245,7 +244,7 @@ export abstract class ApiClient {
     //   "/users/dom",
     //   "?query=12&foo=bar",
     // ];
-    // Ex: 'test.typicode.com/users/dom?query=12&foo=bar' => [
+    // Ex: 'www.google.com/users/dom?query=12&foo=bar' => [
     //   "www.google.com/users/dom?query=12&foo=bar",
     //   undefined,
     //   "www.google.com",
@@ -386,6 +385,7 @@ export abstract class ApiClient {
     };
   }
 
+
 }
 
 
@@ -430,7 +430,7 @@ export class TestApiClient extends ApiClient {
 }
 
 const test = async () => {
-  Terminal.title(`Testing ApiClient`)
+  console.log(`Testing ApiClient`);
 
   const options: ApiClientOptions & { apiBaseUrl?: string; apiIdUser?: number} = {
     apiBaseUrl: 'https://scrownet.metacodi.com/dev/api',
@@ -445,10 +445,10 @@ const test = async () => {
   
     const cuentas = await api.post(`search/cuentas?rel=entidad,divisa`, params);
     
-    Terminal.success(cuentas);
+    console.log(cuentas);
 
   } catch (error: any) {
-    Terminal.error(error, /* exit */ false);
+    console.log("ERROR:", error);
   }
 
 };

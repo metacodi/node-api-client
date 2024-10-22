@@ -30,3 +30,10 @@ export interface ApiRequestOptions {
   timeout?: number;
   timeoutErrorMessage?: string;
 }
+
+
+export interface ErrorObject {
+  code?: number;
+  message: string,
+  data?: any;
+};
