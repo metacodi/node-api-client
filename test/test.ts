@@ -18,7 +18,7 @@ const exec = async (endpoint: string, options?: any) => {
   
   const params: ApiRequestOptions = { params: { AND: [['idEntidad', '=', 8], ['idProveedor', 'is', null], ['idCliente', 'is', null]] } };
 
-  const cuentas = await api.post(`search/cuentas?rel=entidad,divisa`, params);
+  const cuentas = await api.post<any>(`search/cuentas?rel=entidad,divisa`, params);
   return cuentas;
 }
 

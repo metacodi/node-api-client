@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import Prompt from 'commander';
+import * as Prompt from 'commander';
 
 import { incrementPackageVersion, Resource, Terminal, Git, upgradeDependency } from '@metacodi/node-utils';
 

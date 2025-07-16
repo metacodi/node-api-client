@@ -14,11 +14,11 @@ export declare abstract class ApiClient {
         apiSecret: string;
         apiPassphrase: string;
     }): void;
-    get(endpoint: string, options?: ApiRequestOptions): Promise<any>;
-    post(endpoint: string, options?: ApiRequestOptions): Promise<any>;
-    put(endpoint: string, options?: ApiRequestOptions): Promise<any>;
-    delete(endpoint: string, options?: ApiRequestOptions): Promise<any>;
-    request(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any>;
+    get<T>(endpoint: string, options?: ApiRequestOptions): Promise<T>;
+    post<T>(endpoint: string, options?: ApiRequestOptions): Promise<T>;
+    put<T>(endpoint: string, options?: ApiRequestOptions): Promise<T>;
+    delete<T>(endpoint: string, options?: ApiRequestOptions): Promise<T>;
+    request<T>(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<T>;
     requestSyncTestNotWorking(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): void;
     protected splitURL(url: string): {
         protocol: string;
@@ -36,12 +36,18 @@ export declare abstract class ApiClient {
         query: string;
         body: string;
     };
-    protected getAuthHeaders(method: HttpMethod, endpoint: string, params: any): Promise<{
+    protected getAuthHeaders(method: HttpMethod, endpoint: string, params: string | {
+        [key: string]: any;
+    }): Promise<{
         [header: string]: string | number;
     }>;
-    protected buildSignMessage(timestamp: number | string, method: HttpMethod, endpoint: string, params: any): string;
-    protected formatQuery(params: any): string;
-    protected serialiseParams(request?: {
+    protected buildSignMessage(timestamp: number | string, method: HttpMethod, endpoint: string, params: string | {
+        [key: string]: any;
+    }): string;
+    protected formatQuery(params: string | {
+        [key: string]: any;
+    }): string;
+    protected serialiseParams(params?: {
         [key: string]: any;
     }, options?: {
         encodeValues?: boolean;
@@ -65,6 +71,6 @@ export declare class TestApiClient extends ApiClient {
         Authorization: string;
         'Authorization-User': number;
     }>;
-    request(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any>;
+    request<T>(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<T>;
 }
 //# sourceMappingURL=node-api-client.d.ts.map

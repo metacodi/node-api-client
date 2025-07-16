@@ -186,28 +186,31 @@ class ApiClient {
         });
     }
     buildSignMessage(timestamp, method, endpoint, params) {
-        const mParams = String(JSON.stringify(params)).slice(1, -1);
+        const mParams = typeof params === 'string' ? params : String(JSON.stringify(params)).slice(1, -1);
         const formatedParams = String(mParams).replace(/\\/g, '');
         const data = (method === 'GET' || method === 'DELETE') ? this.formatQuery(params) : formatedParams;
         return `${timestamp}${method}${endpoint}${data}`;
     }
     formatQuery(params) {
-        if (!!params && JSON.stringify(params).length !== 2) {
+        if (typeof params === 'string') {
+            return `${params.startsWith('?') ? '' : '?'}${params}`;
+        }
+        else if (typeof params === 'object' && JSON.stringify(params).length !== 2) {
             const serialisedParams = this.serialiseParams(params, { encodeValues: true });
-            return '?' + serialisedParams;
+            return `?${serialisedParams}`;
         }
         else {
             return '';
         }
     }
-    serialiseParams(request = {}, options) {
+    serialiseParams(params = {}, options) {
         if (!options) {
             options = {};
         }
         const strictValidation = options.strictValidation === undefined ? false : options.strictValidation;
         const encodeValues = options.encodeValues === undefined ? true : options.encodeValues;
-        return Object.keys(request).map(key => {
-            const value = request[key];
+        return Object.keys(params).map(key => {
+            const value = params[key];
             if (strictValidation && (value === null || value === undefined || isNaN(value))) {
                 throw { code: 500, message: `Failed to sign API request due to undefined parameter` };
             }

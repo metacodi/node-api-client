@@ -47,20 +47,20 @@ export abstract class ApiClient {
   //  request helpers
   // ---------------------------------------------------------------------------------------------------
 
-  public get(endpoint: string, options?: ApiRequestOptions): Promise<any> { return this.request('GET', endpoint, options); }
+  public get<T>(endpoint: string, options?: ApiRequestOptions): Promise<T> { return this.request('GET', endpoint, options); }
 
-  public post(endpoint: string, options?: ApiRequestOptions): Promise<any> { return this.request('POST', endpoint, options); }
+  public post<T>(endpoint: string, options?: ApiRequestOptions): Promise<T> { return this.request('POST', endpoint, options); }
   
-  public put(endpoint: string, options?: ApiRequestOptions): Promise<any> { return this.request('PUT', endpoint, options); }
+  public put<T>(endpoint: string, options?: ApiRequestOptions): Promise<T> { return this.request('PUT', endpoint, options); }
 
-  public delete(endpoint: string, options?: ApiRequestOptions): Promise<any> { return this.request('DELETE', endpoint, options); }
+  public delete<T>(endpoint: string, options?: ApiRequestOptions): Promise<T> { return this.request('DELETE', endpoint, options); }
 
 
   // ---------------------------------------------------------------------------------------------------
   //  request
   // ---------------------------------------------------------------------------------------------------
 
-  async request(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any> {
+  async request<T>(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<T> {
     try {
       if (!options) { options = {}; }
       const isPublic = options.isPublic === undefined ? false : !!options.isPublic;
@@ -75,7 +75,7 @@ export abstract class ApiClient {
   
       const config: AxiosRequestConfig<any> = {
         method,
-        headers: { ...headers as any },
+        headers: { ...headers },
       };
   
       if (!!timeout) { config.timeout = timeout; }
@@ -290,7 +290,7 @@ export abstract class ApiClient {
     }
   }
 
-  protected async getAuthHeaders(method: HttpMethod, endpoint: string, params: any) {
+  protected async getAuthHeaders(method: HttpMethod, endpoint: string, params: string | { [key: string]: any }) {
     const { apiKey, apiSecret, apiPassphrase } = this;
 
     const timestamp = Date.now();
@@ -305,28 +305,30 @@ export abstract class ApiClient {
     return headers;
   }
 
-  protected buildSignMessage(timestamp: number | string, method: HttpMethod, endpoint: string, params: any): string {
-    const mParams = String(JSON.stringify(params)).slice(1, -1);
+  protected buildSignMessage(timestamp: number | string, method: HttpMethod, endpoint: string, params: string | { [key: string]: any }): string {
+    const mParams = typeof params === 'string' ? params : String(JSON.stringify(params)).slice(1, -1);
     const formatedParams = String(mParams).replace(/\\/g, '');
     const data = (method === 'GET' || method === 'DELETE') ? this.formatQuery(params) : formatedParams;
     return `${timestamp}${method}${endpoint}${data}`;
   }
 
-  protected formatQuery(params: any) {
-    if (!!params && JSON.stringify(params).length !== 2) {
+  protected formatQuery(params: string | { [key: string]: any }) {
+    if (typeof params === 'string') {
+      return `${params.startsWith('?') ? '' : '?'}${params}`;
+    } else if (typeof params === 'object' && JSON.stringify(params).length !== 2) {
       const serialisedParams = this.serialiseParams(params, { encodeValues: true });
-      return '?' + serialisedParams;
+      return `?${serialisedParams}`;
     } else {
       return '';
     }
   }
 
-  protected serialiseParams(request: { [key: string]: any } = {}, options?: { encodeValues?: boolean, strictValidation?: boolean }): string {
+  protected serialiseParams(params: { [key: string]: any } = {}, options?: { encodeValues?: boolean, strictValidation?: boolean }): string {
     if (!options) { options = {}; }
     const strictValidation = options.strictValidation === undefined ? false : options.strictValidation;
     const encodeValues = options.encodeValues === undefined ? true : options.encodeValues;
-    return Object.keys(request).map(key => {
-      const value = request[key];
+    return Object.keys(params).map(key => {
+      const value = params[key];
       if (strictValidation && (value === null || value === undefined || isNaN(value))) {
         throw { code: 500, message: `Failed to sign API request due to undefined parameter` };
       }
@@ -420,11 +422,11 @@ export class TestApiClient extends ApiClient {
     };
   }
 
-  override async request(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any> {
+  override async request<T>(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<T> {
     if (!options) { options = {}; } 
     options.headers = options.headers || {};
     options.headers['Content-Type'] = 'application/json';
-    return super.request(method, endpoint, options);
+    return super.request<T>(method, endpoint, options);
   }
 
 }
@@ -443,7 +445,7 @@ const test = async () => {
   
     const params: ApiRequestOptions = { params: { AND: [['idEntidad', '=', 8], ['idProveedor', 'is', null], ['idCliente', 'is', null]] } };
   
-    const cuentas = await api.post(`search/cuentas?rel=entidad,divisa`, params);
+    const cuentas = await api.post<any[]>(`search/cuentas?rel=entidad,divisa`, params);
     
     console.log(cuentas);
 

@@ -27,11 +27,11 @@ export class TestApiClient extends ApiClient {
     };
   }
 
-  override async request(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<any> {
+  override async request<T>(method: HttpMethod, endpoint: string, options?: ApiRequestOptions): Promise<T> {
     if (!options) { options = {}; } 
     options.headers = options.headers || {};
     options.headers['Content-Type'] = 'application/json';
-    return super.request(method, endpoint, options);
+    return super.request<T>(method, endpoint, options);
   }
 
 }
